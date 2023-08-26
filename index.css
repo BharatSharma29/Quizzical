@@ -1,0 +1,29 @@
+*, body {
+    background-color: #F5F7FB;
+    margin: 220px 70px 180px 70px;
+}
+
+.header {
+    font-family: 'Karla', sans-serif;
+    font-weight: 700;
+    color: #293264;
+    text-align: center;
+    font-size: 2rem;
+}
+
+.description {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    color: #293264;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.start-btn {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    color: #F5F7FB;
+    text-align: center;
+    font-size: 1rem;
+    border: 1px solid black;
+}
