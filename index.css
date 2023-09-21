@@ -62,7 +62,7 @@
     margin-top: 20px;
 }
 
-.options {
+.answer {
     border: 1px solid #4D5B9E;
     padding: 7px 15px;
     border-radius: 8px;
@@ -70,7 +70,7 @@
     color: #293264;
 }
 
-.options:hover {
+.answer:hover {
     background-color: #D6DBF5;
 }
 
@@ -80,7 +80,7 @@ hr {
     width: 800px;
 }
 
-.selected {
+.answer--selected {
     background-color: #D6DBF5;
     border: none;
 }
@@ -146,12 +146,12 @@ p {
     display: none;
 }
 
-.wrong {
+.answer--incorrect {
     background-color: #F8BCBC;
     border: none;
 }
 
-.right {
+.answer--correct {
     background-color: #94D7A2;
     border: none;
 }
@@ -165,7 +165,7 @@ h1 {
     margin-top: 40px; 
 }
 
-@media (max-width: 480px) {
+/* @media (max-width: 480px) {
     .question {
         font-size: 1.2rem;
         margin-top: 30px;
@@ -184,7 +184,7 @@ h1 {
     hr {
         margin: 20px auto;
         border: 1px solid #DBDEF0;
-        width: 400px;
+        width: 280px;
     }
     
     .check-ans {
@@ -217,4 +217,4 @@ h1 {
         font-size: 1rem;
         margin-bottom: 20px;
     }
-}
+} */

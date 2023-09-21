@@ -1,165 +1,141 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { decode } from "html-entities";
+import { nanoid } from "nanoid";
+
+// Enum container
+const RequestStatus = {
+    Idle: 'idle',
+    Pending: 'pending',
+    Resolved: 'resolved',
+    Rejected: 'rejected',
+}
 
 export default function Quiz() {
     //state variables
     const [data, setData] = React.useState([])
     const [checkAns, setCheckAns] = React.useState(false)
-    const [loading, setLoading] = React.useState(true)
+    const [status, setStatus] = React.useState(RequestStatus.Idle)
 
-    //counter for number of correct answers
-    let counter = React.useRef(0)
-
+    const counter = data.reduce((accumulator, item, index, arrayRef) => {
+        if (item.selectedAnswerId !== item.correctAnswerId) return accumulator;
+        return accumulator + 1;
+    }, 0)
 
     React.useEffect(() => {
+        setStatus(RequestStatus.Pending)
+
         fetch("https://opentdb.com/api.php?amount=5&type=multiple")
             .then(res => res.json())
             .then(resData => {
-                let increment  = 1
-                let tempArr = resData.results.map(obj => {
-                    let arr = obj.incorrect_answers
-                    arr.push(obj.correct_answer)
-                    //Shuffling options
-                    arr = shuffle(arr)
+                let tempArr = resData.results.map(data => {
+                    const correctAnswer = {
+                        id: nanoid(),
+                        value: decode(data.correct_answer),
+                    }
+
+                    const options = data.incorrect_answers.map(value => ({
+                        id: nanoid(),
+                        value,
+                    }))
+
+                    options.push(correctAnswer)
+                    options.sort(() => Math.random() > 0.5)
+
                     return {
-                        id: increment++,
-                        question: decode(obj.question),
-                        options: [
-                                {
-                                    option: arr[0],
-                                    selected: false,
-                                    id: "a"
-                                },
-                                {
-                                    option: arr[1],
-                                    selected: false,
-                                    id: "b"
-                                },
-                                {
-                                    option: arr[2],
-                                    selected: false,
-                                    id: "c"
-                                },
-                                {
-                                    option: arr[3],
-                                    selected: false,
-                                    id: "d"
-                                }
-                            ],
-                        isSelected: false,
-                        correctAns: obj.correct_answer
+                        id: nanoid(),
+                        question: decode(data.question),
+                        options,
+                        correctAnswerId: correctAnswer.id,
+                        selectedAnswerId: null,
                     }
                 })
+
                 setData(tempArr)
-                setLoading(false)
+                setStatus(RequestStatus.Resolved)
+                console.log("UseEffect")
+            })
+            .catch(error => {
+                console.log(error)
+                setStatus(RequestStatus.Rejected)
             })
     }, [])
 
-    function shuffle(array) {
-        let currentIndex = array.length,  randomIndex;
-
-        // While there remain elements to shuffle.
-        while (currentIndex > 0) {
-      
-          // Pick a remaining element.
-          randomIndex = Math.floor(Math.random() * currentIndex);
-          currentIndex--;
-      
-          // And swap it with the current element.
-          [array[currentIndex], array[randomIndex]] = [
-            array[randomIndex], array[currentIndex]];
-        }
-        return array;
-    }
-
-    function optionClick(optionId, elementId) {
+    function optionClick(questionId, answerId) {
         setData(prev => {
-            prev = prev.map((element) => {
-                if(element.id === elementId){
-                    element.isSelected = true
-                    element.options = element.options.map(choice => {
-                        return choice.id === optionId ? {...choice, selected: true}
-                        : {...choice, selected: false}
-                    })
+            return prev.map((question) => {
+                if (question.id !== questionId) return question
+
+                return {
+                    ...question,
+                    selectedAnswerId: answerId,
                 }
-                return element
             })
-            return prev
         })
     }
 
-    function getClassName(obj, index) {
-        let className = "options"
-        if(obj.options[index].selected && !checkAns){
-            className += " " + "selected"
-        }
-        else if(obj.options[index].selected && obj.options[index].option === obj.correctAns){
-            className += " " + "right"
-            counter.current++
-        }
-        else if(obj.options[index].selected && obj.options[index].option !== obj.correctAns){
-            className += " " + "wrong"
-        }
-        else if(obj.options[index].option === obj.correctAns && checkAns){
-            className += " " + "right"
-        }
-        return className
+    function getCorrectnessClass(gameIsRunning, answerIsCorrect, answerIsSelected) {
+        if (gameIsRunning) return null
+        if (answerIsCorrect) return 'answer--correct'
+        if(answerIsSelected) return 'answer--incorrect'
+        return null
     }
 
-    
+    function getClassName(
+        gameIsRunning,
+        correctAnswerId,
+        selectedAnswerId,
+        answerId,
+    ) {
+        console.log(" gameIsRunning = " + gameIsRunning)
+
+        const answerIsSelected = selectedAnswerId === answerId
+        const answerIsCorrect = answerId === correctAnswerId || (selectedAnswerId === correctAnswerId && answerIsSelected)
+
+        const selectedClass = answerIsSelected ? 'answer--selected' : null
+        const correctnessClass = getCorrectnessClass(gameIsRunning, answerIsCorrect, answerIsSelected)
+
+        const classes = ['answer', selectedClass, correctnessClass]
+
+        let className = classes.filter(Boolean).join(" ")
+        console.log(className)
+        return className
+
+    }
+
     const questionsElements = data.map( obj =>
         <>
             <h3 className="question">{obj.question}</h3>
             <div className="answers">
                 
+            {obj.options.map(option => (
                 <span 
-                    className={getClassName(obj, 0)}
-                    onClick={() => optionClick(obj.options[0].id, obj.id)} 
+                className={getClassName(!checkAns, obj.correctAnswerId, obj.selectedAnswerId, option.id)}
+                onClick={() => optionClick(obj.id, option.id)} 
                 >
-                    {obj.options[0].option}
+                    {option.value}
                 </span>
-                
-                <span 
-                    className={getClassName(obj, 1)}
-                    onClick={() => optionClick(obj.options[1].id, obj.id)}
-                >
-                    {obj.options[1].option}
-                </span>
-
-                <span 
-                    className={getClassName(obj, 2)}
-                    onClick={() => optionClick(obj.options[2].id, obj.id)}
-                >
-                    {obj.options[2].option}
-                </span>
-
-                <span
-                    className={getClassName(obj, 3)}
-                    onClick={() => optionClick(obj.options[3].id, obj.id)}
-                >
-                    {obj.options[3].option}
-                </span>
+            ))}
             </div>
             <hr />
         </>
     )
 
     function handleClick() {
-        const isReady = data.every((element) => element.isSelected)
+        const isReady = data.every((answer) => answer.selectedAnswerId)
         if(!isReady)
             document.getElementById('ans-ques').style.display = "block" 
         setCheckAns(isReady)
     }
 
     return(
-        loading ? (<h1>Loading....</h1>) 
+        (status !== 'resolved') ? (<h1>Loading....</h1>) 
         :(
             <>
                 {questionsElements}
                 {checkAns ?
                     <div className="score">
-                        <p>You scored {counter.current}/5 correct answers</p>
+                        <p>You scored {counter}/5 correct answers</p>
                         <Link to="/" className="ply-agn-btn">Play again</Link>
                     </div>
                     :

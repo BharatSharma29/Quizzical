@@ -1,12 +1,13 @@
 {
   "name": "quizzical",
   "author": "bharat sharma",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "type": "module",
   "dependencies": {
     "firebase": "^10.1.0",
     "html-entities": "^2.4.0",
     "miragejs": "0.1.46",
+    "nanoid": "^5.0.1",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-icons": "^4.10.1",
