@@ -17,6 +17,7 @@ export default function Quiz() {
     const [checkAns, setCheckAns] = React.useState(false)
     const [status, setStatus] = React.useState(RequestStatus.Idle)
 
+    // TODO: Make this a function that takes in the array reference and returns the calculated data
     const counter = data.reduce((accumulator, item, index, arrayRef) => {
         if (item.selectedAnswerId !== item.correctAnswerId) return accumulator;
         return accumulator + 1;
@@ -29,6 +30,9 @@ export default function Quiz() {
             .then(res => res.json())
             .then(resData => {
                 let tempArr = resData.results.map(data => {
+                    // TODO: Make a function that takes in a value and creates this object.
+                    // (a function which generates an object for as is called a `factory`)
+                    // Where else this `factory` function can be used?
                     const correctAnswer = {
                         id: nanoid(),
                         value: decode(data.correct_answer),
@@ -36,6 +40,7 @@ export default function Quiz() {
 
                     const options = data.incorrect_answers.map(value => ({
                         id: nanoid(),
+                        // TODO: (This is my bad, value should also be `decoded`)
                         value,
                     }))
 
@@ -74,6 +79,7 @@ export default function Quiz() {
         })
     }
 
+    // TODO: Extract this function outside the component or into a utils file
     function getCorrectnessClass(gameIsRunning, answerIsCorrect, answerIsSelected) {
         if (gameIsRunning) return null
         if (answerIsCorrect) return 'answer--correct'
@@ -81,6 +87,7 @@ export default function Quiz() {
         return null
     }
 
+    // TODO: Extract this function outside the component or into a utils file
     function getClassName(
         gameIsRunning,
         correctAnswerId,
@@ -90,6 +97,8 @@ export default function Quiz() {
         console.log(" gameIsRunning = " + gameIsRunning)
 
         const answerIsSelected = selectedAnswerId === answerId
+        // Hmmm. I think this should stay as `answerId === correctAnswerId` :thinking-emoji
+        // Would you be able to share the bug that was caused by the initial implementation?
         const answerIsCorrect = answerId === correctAnswerId || (selectedAnswerId === correctAnswerId && answerIsSelected)
 
         const selectedClass = answerIsSelected ? 'answer--selected' : null
@@ -123,12 +132,15 @@ export default function Quiz() {
 
     function handleClick() {
         const isReady = data.every((answer) => answer.selectedAnswerId)
+        // This is fine, but try to avoid vanilla js approach in React
         if(!isReady)
             document.getElementById('ans-ques').style.display = "block" 
         setCheckAns(isReady)
     }
 
     return(
+        // TODO: Try to use conditional rendering instead of ternary
+        // It will make your code easier to read and maintain
         (status !== 'resolved') ? (<h1>Loading....</h1>) 
         :(
             <>
@@ -148,3 +160,16 @@ export default function Quiz() {
         )
     )
 }
+
+
+/**
+ * Additional task for you to tease your brain - we will build on top of this ;)
+ * --------------------------------------------
+ * Try to extract your state + useEffect into a custom hook
+ * That hook should return the following values:
+ * 1. quizData
+ * 2. requestStatus
+ * 3. updateAnswer - currently named as optionClick
+ * 4. counter
+ * --------------------------------------------
+ */
