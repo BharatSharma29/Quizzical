@@ -30,8 +30,11 @@ function getClassName(
   return className;
 }
 
+// This shouldn't be extracted
 export function getQuestionElements(quizData, updateAnswer) {
   return quizData.map((obj) => (
+    // Never use `nanoid()` this way as the key, you only suppress the warning
+    // in the console about the `key` attribute
     <div key={nanoid()}>
       <h3 className="question">{obj.question}</h3>
       <div className="answers">

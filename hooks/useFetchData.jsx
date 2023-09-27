@@ -46,9 +46,11 @@ export default function useFetchData() {
             })
     }, [])
 
+    // This should be extracted as a util
     function objFactory(value) {
         return {
             id: nanoid(),
+            // I would encode the value as well
             value
         }
     }
@@ -66,10 +68,12 @@ export default function useFetchData() {
         })
     }
 
+    // This can also be extracted as a function
     const counter = quizData.reduce((accumulator, item, index, arrayRef) => {
         if (item.selectedAnswerId !== item.correctAnswerId) return accumulator;
         return accumulator + 1;
     }, 0)
 
+    // Use an object as the return value instead of an array (tuple)
     return [quizData, updateAnswer, counter, status]
 }
