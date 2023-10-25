@@ -1,6 +1,7 @@
 import { decode } from "html-entities";
 import { nanoid } from "nanoid";
 import React from "react";
+import { objFactory } from "../utils";
 
 const RequestStatus = {
     Idle: 'idle',
@@ -15,7 +16,6 @@ export default function useFetchData() {
 
     React.useEffect(() => {
         setStatus(RequestStatus.Pending)
-
         fetch("https://opentdb.com/api.php?amount=5&type=multiple")
             .then(res => res.json())
             .then(resData => {
@@ -25,7 +25,12 @@ export default function useFetchData() {
                     const options = data.incorrect_answers.map(value => objFactory(decode(value)))
 
                     options.push(correctAnswer)
-                    options.sort(() => Math.random() > 0.5)
+                    console.log("Before Sort = " + options[0])
+                    options.sort(() => {
+                        console.log(Math.random() > 0.5)
+                        return Math.random() > 0.5
+                    })
+                    console.log("After Sort = " + options[0])
 
                     return {
                         id: nanoid(),
@@ -35,23 +40,14 @@ export default function useFetchData() {
                         selectedAnswerId: null,
                     }
                 })
-
                 setQuizData(tempArr)
                 setStatus(RequestStatus.Resolved)
-                console.log("UseEffect")
             })
             .catch(error => {
                 console.log(error)
                 setStatus(RequestStatus.Rejected)
             })
     }, [])
-
-    function objFactory(value) {
-        return {
-            id: nanoid(),
-            value
-        }
-    }
 
     function updateAnswer(questionId, answerId) {
         setQuizData(prev => {
@@ -66,10 +62,17 @@ export default function useFetchData() {
         })
     }
 
-    const counter = quizData.reduce((accumulator, item, index, arrayRef) => {
-        if (item.selectedAnswerId !== item.correctAnswerId) return accumulator;
-        return accumulator + 1;
-    }, 0)
+    function getCounter() {
+        if(!quizData)
+            return 0
+        const ans = quizData.reduce((accumulator, item, index, arrayRef) => {
+            if (item.selectedAnswerId !== item.correctAnswerId) return accumulator;
+            return accumulator + 1;
+        }, 0)
+        return ans
+    }
 
-    return [quizData, updateAnswer, counter, status]
+    const counter = getCounter()
+
+    return {quizData, updateAnswer, counter, status}
 }

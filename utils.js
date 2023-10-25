@@ -7,7 +7,7 @@ function getCorrectnessClass(gameIsRunning, answerIsCorrect, answerIsSelected) {
   return null;
 }
 
-function getClassName(
+export function getClassName(
   gameIsRunning,
   correctAnswerId,
   selectedAnswerId,
@@ -26,30 +26,13 @@ function getClassName(
   const classes = ["answer", selectedClass, correctnessClass];
 
   let className = classes.filter(Boolean).join(" ");
-  console.log(className);
+  // console.log(className);
   return className;
 }
 
-export function getQuestionElements(quizData, updateAnswer) {
-  return quizData.map((obj) => (
-    <div key={nanoid()}>
-      <h3 className="question">{obj.question}</h3>
-      <div className="answers">
-        {obj.options.map((option) => (
-          <span
-            className={getClassName(
-              !checkAns,
-              obj.correctAnswerId,
-              obj.selectedAnswerId,
-              option.id
-            )}
-            onClick={() => updateAnswer(obj.id, option.id)}
-          >
-            {option.value}
-          </span>
-        ))}
-      </div>
-      <hr />
-    </div>
-  ));
+export function objFactory(value) {
+  return {
+    id: nanoid(),
+    value,
+  };
 }
